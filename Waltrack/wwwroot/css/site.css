@@ -21,13 +21,17 @@ html {
 *:not(.fa-solid):not(.fa):not(.e-icons) {
     font-family: "Montserrat", sans-serif;
 }
+
 body {
   margin-bottom: 60px;
   background-color: #12161d;
   color:#fff;
 }
 
-
+.logoo{
+    height:50px;
+    width:50px;
+}
 
 /*Button*/
 .btn:focus, .btn:active {
@@ -40,24 +44,6 @@ body {
     text-decoration: none;
     color: inherit;
 }
-
-/*BreadCrumb*/
-.e-breadcrumb a, .e-breadcrumb a:hover {
-    text-decoration: none !important;
-    color: inherit !important;
-}
-
-
-.e-bigger {
-    font-size: x-large;
-}
-
-.main-content {
-    margin-left: 290px;
-    height: 92vh;
-}
-
-
 /*BreadCrumb*/
 .e-breadcrumb a, .e-breadcrumb a:hover {
     text-decoration: none !important;
@@ -158,8 +144,6 @@ body {
 
 .app-logo {
     padding: 10px 10px;
-    height: 90px;
-    width: 90px;
 }
 
 /*Menu*/
@@ -224,7 +208,7 @@ nav.navbar {
         nav.navbar i:hover, nav.navbar img:hover {
             cursor: pointer;
             background-color: #48545f14;
-            transform: scale(1.5) translateZ(0px);
+            transform: scale(1.05) translateZ(0px);
         }
 
 nav.navbar {
@@ -298,7 +282,7 @@ img.profile-pic {
     #sidebar-toggler:hover {
         cursor: pointer;
         background-color: #48545f14;
-        transform: scale(1.5) translateZ(0px);
+        transform: scale(1.05) translateZ(0px);
     }
 
 #sidebar.e-close {
