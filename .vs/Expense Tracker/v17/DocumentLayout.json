@@ -1,7 +1,12 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\Alaa As\u0027ad\\source\\repos\\Expense Tracker\\",
-  "Documents": [],
+  "WorkspaceRootPath": "C:\\Users\\Alaa As\u0027ad\\source\\repos\\Waltrack\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{FEF6C5B7-615E-4E93-A4E9-F9EAAA030779}|Expense Tracker\\Expense Tracker.csproj|c:\\users\\alaa as\u0027ad\\source\\repos\\waltrack\\expense tracker\\expense tracker.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{FEF6C5B7-615E-4E93-A4E9-F9EAAA030779}|Expense Tracker\\Expense Tracker.csproj|solutionrelative:expense tracker\\expense tracker.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,7 +14,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 249,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
@@ -22,6 +27,19 @@
             {
               "$type": "Bookmark",
               "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Expense Tracker",
+              "DocumentMoniker": "C:\\Users\\Alaa As\u0027ad\\source\\repos\\Waltrack\\Expense Tracker\\Expense Tracker.csproj",
+              "RelativeDocumentMoniker": "Expense Tracker\\Expense Tracker.csproj",
+              "ToolTip": "C:\\Users\\Alaa As\u0027ad\\source\\repos\\Waltrack\\Expense Tracker\\Expense Tracker.csproj",
+              "RelativeToolTip": "Expense Tracker\\Expense Tracker.csproj",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-09-07T11:30:08.21Z",
+              "EditorCaption": ""
             }
           ]
         }

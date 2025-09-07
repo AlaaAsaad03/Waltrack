@@ -1,0 +1,10 @@
+# Visual Studio temporary files
+.vs/
+bin/
+obj/
+*.user
+*.suo
+
+# Others
+*.log
+*.DS_Store
