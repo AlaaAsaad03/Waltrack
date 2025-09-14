@@ -8,42 +8,116 @@
     <div class="col-md-7">
         <div class="widget p-5" style="background-color:#212b36">
             <form asp-action="AddOrEdit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <input type="hidden" name="TransactionId" value="@Model.TransactionId" />
 
                 <div class="mb-3">
                     <ejs-datepicker id="date" ejs-for="Date" placeholder="Date"
-                     floatLabelType="Always" format="MMM-dd-yyyy"></ejs-datepicker>
+                                    floatLabelType="Always" format="MMM-dd-yyyy"></ejs-datepicker>
                     <span asp-validation-for="Date" class="text-danger"></span>
                 </div>
+
                 <div class="mb-3">
+                    @* Bind the 'updatePreview' function to the change event directly here *@
                     <ejs-dropdownlist id="ddlCategory" ejs-for="CategoryId" dataSource="@ViewBag.Categories" placeholder="Category"
-                    floatLabelType="Auto" allowFiltering="true" ignoreAccent="true" filterType="Contains" popupHeight="220px">
+                                      floatLabelType="Auto" allowFiltering="true" ignoreAccent="true" filterType="Contains" popupHeight="220px" change="updatePreview">
                         <e-dropdownlist-fields value="CategoryId" text="TitleWithIcon"></e-dropdownlist-fields>
                     </ejs-dropdownlist>
                     <span asp-validation-for="CategoryId" class="text-danger fs-6"></span>
                 </div>
+
                 <div class="mb-3">
-                    <ejs-numerictextbox id="amount" ejs-for="Amount" Type="text" placeholder="Amount" floatLabelType="Auto" min=0 format="c0"></ejs-numerictextbox>
+                    @* Bind the 'updatePreview' function to the change event directly here *@
+                    <ejs-numerictextbox id="amount" ejs-for="Amount" Type="text" placeholder="Amount" floatLabelType="Auto" min="0" format="c0" change="updatePreview"></ejs-numerictextbox>
                     <span asp-validation-for="Amount" class="text-danger fs-6"></span>
                 </div>
+
                 <div class="mb-3">
                     <ejs-textbox id="note" placeholder="Note" ejs-for="Note" floatLabelType="Auto" multiline="true"></ejs-textbox>
                 </div>
 
-                <ejs-button id="submit" typeof="submit" content="Submit" cssClass="e-success"></ejs-button>
+                <ejs-button id="submit" type="submit" content="Submit" cssClass="e-success"></ejs-button>
             </form>
-    </div>
+        </div>
     </div>
 
     <div class="col-md-5">
-        <div class="widget h-100 d-flex justify-content-center align-items-center">
-            <i class="fa-solid fa-money-bill-transfer fa-2xl"></i>
+        <div id="transactionPreview" class="widget h-100 d-flex flex-column justify-content-center align-items-center"
+             style="background: linear-gradient(135deg, #1f2937, #111827);
+                border-radius:2rem;
+                padding:2rem;
+                color:white;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                transition: all 0.4s ease;">
+
+            <!-- Icon inside a perfect circle -->
+            <div id="iconPreview" style="font-size:2rem;
+                                     width:5rem;
+                                     height:5rem;
+                                     display:flex;
+                                     justify-content:center;
+                                     align-items:center;
+                                     border-radius:50%;
+                                     background-color: rgba(255,255,255,0.1);
+                                     margin-bottom:1rem;
+                                     transition: transform 0.3s;">
+                💵
+            </div>
+
+            <div id="amountPreview" style="font-size:2rem; font-weight:600; margin-bottom:0.5rem;">$0</div>
+            <div id="categoryPreview" style="font-size:1.1rem; color:#ccc; margin-bottom:0.5rem;">Category</div>
+            <div id="typeBadge" style="padding:0.2rem 0.5rem; font-size:0.8rem; border-radius:0.5rem; background-color:rgba(255,255,255,0.2);">
+                Type
+            </div>
         </div>
     </div>
-</div>
 
+@section Scripts {
+        <script>
+            function updatePreview() {
+                var ddlObj = document.getElementById("ddlCategory")?.ej2_instances[0];
+                var amountObj = document.getElementById("amount")?.ej2_instances[0];
+                if (!ddlObj || !amountObj) return;
 
-@* @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-} *@
+                const iconPreview = document.getElementById("iconPreview");
+                const amountPreview = document.getElementById("amountPreview");
+                const categoryPreview = document.getElementById("categoryPreview");
+                const typeBadge = document.getElementById("typeBadge");
+                const previewBox = document.getElementById("transactionPreview");
+
+                // --- Extract selected Category Data ---
+                const selectedOption = ddlObj.itemData || {};
+                const icon = selectedOption.Icon || "💵";
+                const title = selectedOption.Title || "Category";
+
+                // --- Apply to Preview ---
+                iconPreview.innerText = icon;   // circle shows icon only
+                categoryPreview.innerText = title; // title only under amount
+
+                // --- Background by type ---
+                const isExpense = selectedOption.Type === "Expense";
+                previewBox.style.background = isExpense
+                    ? "linear-gradient(135deg, #7f1d1d, #4b0505)"
+                    : "linear-gradient(135deg, #14532d, #064e3b)";
+
+                // --- Amount formatting ---
+                const amount = amountObj.value || 0;
+                const sign = isExpense ? "-" : "+";
+                amountPreview.innerText = `${sign}${amount.toLocaleString("en-US", { style: "currency", currency: "USD" })}`;
+
+                // Animate amount update
+                amountPreview.classList.remove("amount-updated");
+                void amountPreview.offsetWidth;
+                amountPreview.classList.add("amount-updated");
+
+                // --- Type badge ---
+                typeBadge.innerText = isExpense ? "Expense" : "Income";
+                typeBadge.style.backgroundColor = isExpense ? "rgba(255,0,0,0.2)" : "rgba(0,255,0,0.2)";
+            }
+
+            document.addEventListener("DOMContentLoaded", function () {
+                updatePreview();
+            });
+        </script>
+
+}

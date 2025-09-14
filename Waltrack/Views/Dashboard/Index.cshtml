@@ -1,5 +1,6 @@
 ﻿@{
     ViewData["IsDashboard"] = true;
+
 }
 
 @*Summary Widgets*@
@@ -63,23 +64,37 @@
                 <h5>Expense By Category</h5>
             </div>
 
-            <ejs-accumulationchart id="doughnutchart" background="#1a222b" enableSmartLabels>
-
-                @*Chart*@
+            <ejs-accumulationchart id="doughnutchart" background="#1a222b" enableSmartLabels="true">
                 <e-accumulation-series-collection>
-                    <e-accumulation-series dataSource="ViewBag.DoughnutChartData" xName="categoryTitleWithIcon" yName="amount" innerRadius="40%" legendShape="Circle" palettes=@(new string[] { "#0e8d76", "#a4b219", "#cb9b00", "#8a442c", "#0454b5", "#7d0a0a", "#822690", "#4c2090", "#313e93", "#0096ac" })>
-                        <e-accumulationseries-datalabel name="formattedAmount" visible></e-accumulationseries-datalabel>
+                    <e-accumulation-series dataSource="ViewBag.DoughnutChartData"
+                                           xName="categoryTitleWithIcon"
+                                           yName="amount"
+                                           innerRadius="40%"
+                                           legendShape="Circle"
+                                           palettes=@(new string[] { "#0e8d76", "#a4b219", "#cb9b00", "#8a442c", "#0454b5", "#7d0a0a", "#822690", "#4c2090", "#313e93", "#0096ac" })>
+                        <e-accumulationseries-datalabel name="formattedAmount"
+                                                        visible="true"
+                                                        position="Outside"
+                                                        color="#ffffff"
+                                                        size="12px">
+                        </e-accumulationseries-datalabel>
                     </e-accumulation-series>
                 </e-accumulation-series-collection>
 
-                @*Headers on top of the chart [With toggle enabled]*@
-                <e-accumulationchart-legendsettings position="Top">
-                    <e-legendsettings-textstyle color="#fff" size="1rem"></e-legendsettings-textstyle>
+                @* Auto-wrap legend *@
+                <e-accumulationchart-legendsettings position="Bottom"
+                                                    alignment="Center"
+                                                    toggleVisibility="false"
+                                                    width="100%"
+                                                    overflow="Wrap"
+                                                    maximumLabelWidth="120">
+                    <e-legendsettings-textstyle color="#ffffff" size="0.9rem"></e-legendsettings-textstyle>
                 </e-accumulationchart-legendsettings>
 
-                @*Tooltip on Chart*@
-                <e-accumulationchart-tooltipsettings enable></e-accumulationchart-tooltipsettings>
-
+                <e-accumulationchart-tooltipsettings enable="true"
+                                                     header="Category"
+                                                     template="${point.x}">
+                </e-accumulationchart-tooltipsettings>
             </ejs-accumulationchart>
         </div>
     </div>
@@ -93,42 +108,49 @@
 
             @*Custom color - palettes=@(new string[] { "green", "red" })*@
             <ejs-chart id="spline-chart" background="#1a222b" palettes=@(new string[]{"#54ffa9","#FF0000"})>
-
                 <e-chart-primaryxaxis valueType="Category">
                     <e-majorgridlines width="0"></e-majorgridlines>
                     <e-majorticklines width="0"></e-majorticklines>
                 </e-chart-primaryxaxis>
 
                 <e-chart-primaryyaxis>
-                    @*Custom horizontal lines*@
                     <e-majorgridlines width="1" color="#32414d" dashArray="2,4"></e-majorgridlines>
                     <e-majorticklines width="0"></e-majorticklines>
                     <e-linestyle width="0"></e-linestyle>
                 </e-chart-primaryyaxis>
 
-                @*Remove chart border*@
                 <e-chart-chartarea>
                     <e-chartarea-border width="0"></e-chartarea-border>
                 </e-chart-chartarea>
 
                 <e-series-collection>
+                    <e-series dataSource="ViewBag.SplineChartData"
+                              xName="day"
+                              yName="income"
+                              name="Income"
+                              type="@Syncfusion.EJ2.Charts.ChartSeriesType.Spline"
+                              width="3">
+                    </e-series>
 
-                    @*Income Series*@
-                    <e-series dataSource="ViewBag.SplineChartData" xName="day" yName="income" name="Income" type="@Syncfusion.EJ2.Charts.ChartSeriesType.Spline" width="3"></e-series>
-
-                    @*Expense Series*@
-                    <e-series dataSource="ViewBag.SplineChartData" xName="day" yName="expense" name="Expense" type="@Syncfusion.EJ2.Charts.ChartSeriesType.Spline" width="3"></e-series>
-
+                    <e-series dataSource="ViewBag.SplineChartData"
+                              xName="day"
+                              yName="expense"
+                              name="Expense"
+                              type="@Syncfusion.EJ2.Charts.ChartSeriesType.Spline"
+                              width="3">
+                    </e-series>
                 </e-series-collection>
 
-                @*Headers on top of the chart [With toggle enabled]*@
-                <e-chart-legendsettings position="Top" alignment="Far" toggleVisibility="false">
+                @* Legend on top-right *@
+                <e-chart-legendsettings position="Top"
+                                        alignment="Far"
+                                        toggleVisibility="false"
+                                        overflow="Wrap"
+                                        maximumLabelWidth="120">
                     <e-legendsettings-textstyle color="#fff" size="1rem"></e-legendsettings-textstyle>
                 </e-chart-legendsettings>
 
-                @*Tooltip on Chart*@
                 <e-chart-tooltipsettings enable shared></e-chart-tooltipsettings>
-
             </ejs-chart>
         </div>
     </div>

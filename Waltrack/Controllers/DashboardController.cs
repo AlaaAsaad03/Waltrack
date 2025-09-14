@@ -18,9 +18,9 @@ namespace Waltrack.Controllers
         {
             #region Last 7 days transactions
 
-            //Last 7 days transactions
-            DateTime StartDate = DateTime.Today.AddDays(-6);
-            DateTime EndDate = DateTime.Today;
+            // Current Month Transactions
+            DateTime StartDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            DateTime EndDate = StartDate.AddMonths(1).AddDays(-1);
 
             List<Transaction> SelectedTransactions = await _context.Transactions
                 .Include(y => y.Category)
@@ -79,10 +79,10 @@ namespace Waltrack.Controllers
             #region Spline Chart  - Income Vs Expense
 
             /* Spline Chart  - Income Vs Expense */
-            //Income
+            // Income
             List<SplineChartData> IncomeSummary = SelectedTransactions
                 .Where(x => x.Category.Type == "Income")
-                .GroupBy(y => y.Date)
+                .GroupBy(y => y.Date.Date)
                 .Select(k => new SplineChartData()
                 {
                     day = k.First().Date.ToString("dd-MMM"),
@@ -90,10 +90,10 @@ namespace Waltrack.Controllers
                 })
                 .ToList();
 
-            //Expense
+            // Expense
             List<SplineChartData> ExpenseSummary = SelectedTransactions
                 .Where(x => x.Category.Type == "Expense")
-                .GroupBy(y => y.Date)
+                .GroupBy(y => y.Date.Date)
                 .Select(k => new SplineChartData()
                 {
                     day = k.First().Date.ToString("dd-MMM"),
@@ -101,13 +101,14 @@ namespace Waltrack.Controllers
                 })
                 .ToList();
 
-            //Combine Income and Expense
-            string[] Last7Days = Enumerable.Range(0, 7).Select(i => StartDate.AddDays(i).ToString("dd-MMM"))
+            // All days in current month
+            string[] DaysInMonth = Enumerable.Range(0, (EndDate - StartDate).Days + 1)
+                .Select(i => StartDate.AddDays(i).ToString("dd-MMM"))
                 .ToArray();
 
-            ViewBag.SplineChartData = (from day in Last7Days
-                                       join income in IncomeSummary on day equals income.day
-                                       into dayIncomeJoined
+            // Combine Income and Expense
+            ViewBag.SplineChartData = (from day in DaysInMonth
+                                       join income in IncomeSummary on day equals income.day into dayIncomeJoined
                                        from income in dayIncomeJoined.DefaultIfEmpty()
                                        join expense in ExpenseSummary on day equals expense.day into dayExpenseJoined
                                        from expense in dayExpenseJoined.DefaultIfEmpty()
@@ -118,6 +119,7 @@ namespace Waltrack.Controllers
                                            expense = expense == null ? 0 : expense.expense,
                                        })
                                       .ToList();
+
 
             #endregion Spline Chart  - Income Vs Expense
 

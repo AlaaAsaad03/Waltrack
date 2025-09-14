@@ -9,6 +9,7 @@
     <link href="https://cdn.syncfusion.com/ej2/29.1.33/bootstrap5-dark.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 @*     <link rel="stylesheet" href="~/Waltrack.styles.css" asp-append-version="true" />
  *@    <!-- Syncfusion ASP.NET Core controls scripts -->
@@ -53,8 +54,21 @@
                                         </div>
 
                                         @*breadcrumb*@
-                                        <ejs-breadcrumb id="breadcrumb" separatorTemplate="@Html.Raw("<span class='fa-solid fa-angle-right'></span>")">
-                                        </ejs-breadcrumb>
+                                        @if (ViewData["BreadcrumbItems"] != null)
+                                        {
+                                            <ejs-breadcrumb id="breadcrumb" separatorTemplate="@Html.Raw("<span class='fa-solid fa-angle-right'></span>")" items="@(ViewData["BreadcrumbItems"] as List<Syncfusion.EJ2.Navigations.BreadcrumbItem>)">
+                                            </ejs-breadcrumb>
+                                        }
+                                        else
+                                        {
+                                            // Fallback or a default breadcrumb
+                                            <ejs-breadcrumb id="breadcrumb" separatorTemplate="@Html.Raw("<span class='fa-solid fa-angle-right'></span>")">
+                                                <e-breadcrumb-items>
+                                                    <e-breadcrumb-item text="Home" url="/"></e-breadcrumb-item>
+                                                    <e-breadcrumb-item text="@ViewData["PageTitle"]" url="@Context.Request.Path"></e-breadcrumb-item>
+                                                </e-breadcrumb-items>
+                                            </ejs-breadcrumb>
+                                        }
                                     </div>
                                 </div>
                             </div>
@@ -66,12 +80,18 @@
             </div>
         </div>
     </div>
-    </div>
+ 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
     <!-- Syncfusion ASP.NET Core Script Manager -->
     <ejs-scripts></ejs-scripts>
+    <ejs-breadcrumb id="breadcrumb" separatorTemplate="@Html.Raw("<span class='fa-solid fa-angle-right'></span>")">
+    </ejs-breadcrumb>
+
+    }
+
 </body>
 </html>

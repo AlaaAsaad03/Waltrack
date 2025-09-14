@@ -21,6 +21,8 @@ namespace Waltrack.Controllers
         // GET: Transaction
         public async Task<IActionResult> Index()
         {
+            PopulateCategories();
+
             var applicationDbContext = _context.Transactions.Include(t => t.Category);
             return View(await applicationDbContext.ToListAsync());
         }
@@ -61,6 +63,7 @@ namespace Waltrack.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+
             var transaction = await _context.Transactions.FindAsync(id);
             if (transaction != null)
             {

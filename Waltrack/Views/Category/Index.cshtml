@@ -2,52 +2,120 @@
 
 @{
     ViewData["PageTitle"] = "Categories";
-    ViewData["PageActionText"] = "+ New Category";
-    ViewData["PageActionUrl"] = "/Category/AddOrEdit"; 
+    ViewData["PageActionUrl"] = "/Category/AddOrEdit";
 }
 
+<div class="card shadow-sm border-0 mb-4" style="border-radius:1rem; background:#1a222b; color:#fff;">
+    <!-- Header -->
+    <div class="card-header d-flex justify-content-between align-items-center"
+         style="border-radius:1rem 1rem 0 0; background:#161d25; color:#fff;">
+        <h5 class="mb-0">📂 Categories</h5>
+        <a href="/Category/AddOrEdit" class="btn btn-success btn-sm">
+            + New Category
+        </a>
+    </div>
 
-<div class="row">
-    <div class="col-md-7">
-        <ejs-grid id="categories" dataSource="@Model" gridLines="None" allowSorting="true" allowPaging="true">
+    <!-- Search & Filter -->
+    <div class="card-body border-bottom pb-3" style="background:#1a222b;">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-6">
+                <input id="searchBox"
+                       type="text"
+                       class="form-control border-0 text-white px-3"
+                       style="background:#2a3542; border-radius:0.5rem;"
+                       placeholder="Search categories...">
+
+            </div>
+            <div class="col-md-6 text-end">
+                <select id="filterType"
+                        class="form-select border-0 text-white px-3"
+                        style="background:#2a3542; border-radius:0.5rem; width:auto; display:inline-block;">
+                    <option value="">All Types</option>
+                    <option value="Income">Income</option>
+                    <option value="Expense">Expense</option>
+                </select>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="card-body" style="background:#1a222b;">
+        <ejs-grid id="categories" dataSource="@Model" allowSorting="true" allowPaging="true" gridLines="None" rowHeight="45">
             <e-grid-pagesettings pageSize="5"></e-grid-pagesettings>
             <e-grid-columns>
-                <e-grid-column headerText="Category" field="TitleWithIcon"></e-grid-column>
-                <e-grid-column headerText="Type" template="#typeColumntemplate" width="150px"></e-grid-column>
-                <e-grid-column headerText="Actions" template="#actionColumntemplate" width="100px"></e-grid-column>
+                <e-grid-column headerText="Category" field="TitleWithIcon" width="200px"></e-grid-column>
+                <e-grid-column headerText="Type" field="Type" template="#typeColumntemplate"
+                               width="150px" textAlign="Center"></e-grid-column>   
+                 <e-grid-column headerText="Actions" template="#actionColumntemplate" width="150px"></e-grid-column>
             </e-grid-columns>
         </ejs-grid>
     </div>
+</div>
 
-    <div class="col-md-5">
-        <div class="widget h-100 d-flex justify-content-center align-items-center">
-            <i class="fa-solid fa-shapes fa-2xl"></i>
-        </div>
-    </div>
-</div> 
-
-
-@*Custom 'Type' column with badge (template definition)*@
+<!-- Type Badge Template -->
 <script id="typeColumntemplate" type="text/x-template">
     ${if(Type=="Income")}
-        <span class="badge bg-success">${Type}</span>
+        <span class="badge bg-success px-3 py-2 rounded-pill">${Type}</span>
     ${else}
-        <span class="badge bg-danger">${Type}</span>
+        <span class="badge bg-danger px-3 py-2 rounded-pill">${Type}</span>
     ${/if}
 </script>
 
-@*Custom 'Actions' column with badge (template definition)*@
+<!-- Action Buttons Template -->
 <script id="actionColumntemplate" type="text/x-template">
-    <div class="d-flex flex-row justify-content-start">
-        <a class="btn btn-sm no-a-decoration" href="/Category/AddOrEdit/${CategoryId}">
-            <i class="fa-solid fa-pen fa-lg"></i>
+    <div class="d-flex gap-2">
+        <a class="btn btn-sm btn-success rounded-circle" href="/Category/AddOrEdit/${CategoryId}" title="Edit">
+            <i class="fa-solid fa-pen"></i>
         </a>
-
-        <form action="/Category/Delete/${CategoryId}" method="post">
+        <form action="/Category/Delete/${CategoryId}" method="post" class="d-inline">
             @Html.AntiForgeryToken()
-            <button type="submit" class="btn btn-sm btn-link no-a-decoration" onclick="return confirm(&quot;Are you sure to delete this record?&quot;)">
-                <i class="fa-solid fa-trash-can fa-lg text-danger"></i>
+            <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle text-white border-0"
+                onclick="return confirm('Are you sure to delete this record?')" title="Delete">
+                <i class="fa-solid fa-trash-can"></i>
             </button>
         </form>
     </div>
 </script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var grid = document.getElementById("categories").ej2_instances[0];
+
+        function applySearchAndFilter() {
+            var searchValue = document.getElementById("searchBox").value.toLowerCase();
+            var filterType = document.getElementById("filterType").value;
+
+            // Start fresh query
+            var query = new ej.data.Query();
+
+            // Apply search across multiple fields
+            if (searchValue) {
+                query = query.search(searchValue, ["TitleWithIcon", "Type"], "contains", true);
+            }
+
+            // Apply filter
+            if (filterType) {
+                query = query.where("Type", "equal", filterType, true);
+            }
+
+            // Apply final query to the grid
+            grid.query = query;
+            grid.refresh();
+        }
+
+        // Empty state
+        grid.dataBound = function () {
+            if (grid.currentViewData.length === 0) {
+                grid.element.querySelector(".e-content").innerHTML =
+                    "<div class='text-center py-4 text-muted'>No categories found. <br><a href='/Category/AddOrEdit' class='btn btn-sm btn-success mt-2'>+ Add First Category</a></div>";
+            }
+        };
+
+        // Events
+        document.getElementById("searchBox").addEventListener("keyup", applySearchAndFilter);
+        document.getElementById("filterType").addEventListener("change", applySearchAndFilter);
+    });
+</script>
+

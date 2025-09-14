@@ -1,0 +1,331 @@
+﻿@model IEnumerable<Waltrack.Models.Transaction>
+@using Syncfusion.EJ2.HeatMap
+
+@{
+    ViewData["PageTitle"] = "Reports";
+
+    var query = ViewContext.HttpContext.Request.Query;
+    string startDateQuery = query["startDate"];
+    string endDateQuery = query["endDate"];
+
+    Func<DateTime, DateTime, string> getQuickBtnClass = (btnStart, btnEnd) =>
+    {
+        if (DateTime.TryParse(startDateQuery, out var start) && DateTime.TryParse(endDateQuery, out var end))
+        {
+            return (start.Date == btnStart.Date && end.Date == btnEnd.Date) ? "btn-success" : "btn-outline-success";
+        }
+        return "btn-outline-success";
+    };
+
+    var heatmapData = ViewBag.HeatmapData as List<List<decimal>>;
+    bool hasData = heatmapData != null && heatmapData.Count > 0 && Model.Any();
+}
+
+<!-- Filters Panel -->
+<div class="card shadow-sm border-0 mb-4" style="background:#1a222b; color:#fff; border-radius:1rem;">
+    <div class="card-body">
+        <form method="get" action="/Reports" class="d-flex flex-column gap-3">
+            <div class="d-flex flex-wrap align-items-center gap-4">
+
+                <!-- Manual Date Range -->
+                <div class="d-flex gap-2 align-items-center flex-wrap">
+                    <ejs-datepicker id="startDate" name="startDate" placeholder="Start Date"
+                                    floatLabelType="Auto" format="MMM-dd-yyyy" value="@ViewBag.StartDate"
+                                    style="height:40px; border-radius:0.5rem;"></ejs-datepicker>
+
+                    <ejs-datepicker id="endDate" name="endDate" placeholder="End Date"
+                                    floatLabelType="Auto" format="MMM-dd-yyyy" value="@ViewBag.EndDate"
+                                    style="height:40px; border-radius:0.5rem;"></ejs-datepicker>
+                </div>
+
+                <!-- Quick Filters -->
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <a href="/Reports?startDate=@DateTime.Today.ToString("yyyy-MM-dd")&endDate=@DateTime.Today.ToString("yyyy-MM-dd")"
+                       class="btn @getQuickBtnClass(DateTime.Today, DateTime.Today) quick-btn">Today</a>
+                    <a href="/Reports?startDate=@DateTime.Today.AddDays(-6).ToString("yyyy-MM-dd")&endDate=@DateTime.Today.ToString("yyyy-MM-dd")"
+                       class="btn @getQuickBtnClass(DateTime.Today.AddDays(-6), DateTime.Today) quick-btn">Last 7 Days</a>
+                    <a href="/Reports?startDate=@(new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).ToString("yyyy-MM-dd"))&endDate=@DateTime.Today.ToString("yyyy-MM-dd")"
+                       class="btn @getQuickBtnClass(new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1), DateTime.Today) quick-btn">This Month</a>
+                    <a href="/Reports?startDate=@(new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(-1).ToString("yyyy-MM-dd"))&endDate=@(new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddDays(-1).ToString("yyyy-MM-dd"))"
+                       class="btn @getQuickBtnClass(new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(-1), new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddDays(-1)) quick-btn">Last Month</a>
+                </div>
+
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-2">
+                <button type="submit" class="btn btn-success px-4" style="height:38px;">Apply</button>
+                <a href="/Reports" class="btn btn-secondary px-4" style="height:38px;">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (!hasData)
+{
+    <!-- No Transactions Message -->
+    <div class="text-center text-muted my-5">
+        <i class="bi bi-graph-up" style="font-size:3rem;"></i>
+        <p class="mt-3 fs-5">No transactions available for the selected period.</p>
+    </div>
+}
+else
+{
+    <!-- Dashboard Overview -->
+    <div class="row g-3 mb-4">
+        <!-- Income Card -->
+        <div class="col-md-4 col-sm-12 d-flex">
+            <div class="card shadow-sm border-0 h-100 w-100"
+                 style="background:linear-gradient(135deg,#1a222b,#243447); border-radius:1rem; color:#fff;">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <div class="d-flex align-items-center justify-content-center mb-2">
+                        <i class="bi bi-cash-coin fs-2 text-success me-2"></i>
+                        <h6 class="mb-0">Total Income</h6>
+                    </div>
+                    <h4 class="fw-bold text-success mb-0">$ @ViewBag.TotalIncome</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expense Card -->
+        <div class="col-md-4 col-sm-12 d-flex">
+            <div class="card shadow-sm border-0 h-100 w-100"
+                 style="background:linear-gradient(135deg,#1a222b,#332f2f); border-radius:1rem; color:#fff;">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <div class="d-flex align-items-center justify-content-center mb-2">
+                        <i class="bi bi-cart-dash fs-2 text-danger me-2"></i>
+                        <h6 class="mb-0">Total Expense</h6>
+                    </div>
+                    <h4 class="fw-bold text-danger mb-0">$ @ViewBag.TotalExpense</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Balance Card -->
+        <div class="col-md-4 col-sm-12 d-flex">
+            <div class="card shadow-sm border-0 h-100 w-100"
+                 style="background:linear-gradient(135deg,#1a222b,#2b3a42); border-radius:1rem; color:#fff;">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <div class="d-flex align-items-center justify-content-center mb-2">
+                        <i class="bi bi-wallet2 fs-2 text-warning me-2"></i>
+                        <h6 class="mb-0">Balance</h6>
+                    </div>
+                    <h4 class="fw-bold text-warning mb-0">$ @ViewBag.Balance</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 p-3 h-100" style="background:#1a222b; color:#fff;">
+                <h6 class="fw-bold mb-3">Income vs Expense Trend</h6>
+                <ejs-chart id="trend-chart" background="#1a222b" palettes=@(new string[]{"#28a745","#dc3545"})>
+                    <e-chart-primaryxaxis valueType="DateTime" labelFormat="dd-MMM"></e-chart-primaryxaxis>
+                    <e-series-collection>
+                        <e-series dataSource="ViewBag.SplineChartData" xName="day" yName="income" name="Income" type="Line"></e-series>
+                        <e-series dataSource="ViewBag.SplineChartData" xName="day" yName="expense" name="Expense" type="Line"></e-series>
+                    </e-series-collection>
+                    <e-chart-legendsettings position="Top"></e-chart-legendsettings>
+                    <e-chart-tooltipsettings enable shared></e-chart-tooltipsettings>
+                </ejs-chart>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 p-3 h-100" style="background:#1a222b; color:#fff;">
+                <h6 class="fw-bold mb-3">Expense Heatmap</h6>
+                <ejs-heatmap id="expense-heatmap"
+                             background="#1a222b"
+                             border='new { width = 0, color = "#1a222b" }'
+                             xAxis="@ViewBag.HeatmapXAxis"
+                             yAxis="@ViewBag.HeatmapYAxis"
+                             dataSource="@heatmapData"
+                             paletteSettings="@ViewBag.HeatmapPalette">
+                </ejs-heatmap>
+            </div>
+        </div>
+    </div>
+
+<!-- Insights -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4 col-sm-12 d-flex">
+        <div class="card p-3 text-center h-100 w-100" style="background:#212936; border-radius:0.75rem;">
+            <i class="bi bi-pie-chart-fill fs-2 text-danger mb-2"></i>
+            <div class="fw-bold text-danger">Top Expense Category</div>
+            <div class="small text-muted">@ViewBag.TopCategory</div>
+        </div>
+    </div>
+
+    <div class="col-md-4 col-sm-12 d-flex">
+        <div class="card p-3 text-center h-100 w-100" style="background:#212936; border-radius:0.75rem;">
+            <i class="bi bi-graph-up fs-2 text-warning mb-2"></i>
+            <div class="fw-bold text-warning">Expense Trend</div>
+            <div class="small text-muted">@ViewBag.ExpenseTrend</div>
+        </div>
+    </div>
+
+    <div class="col-md-4 col-sm-12 d-flex">
+        <div class="card p-3 text-center h-100 w-100" style="background:#212936; border-radius:0.75rem;">
+            <i class="bi bi-cash-stack fs-2 text-success mb-2"></i>
+            <div class="fw-bold text-success">Avg Transaction</div>
+            <div class="small text-muted">@ViewBag.AvgTransaction</div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Transactions Grid -->
+<div class="card shadow-sm border-0" style="background:#1a222b; color:#fff; border-radius:1rem;">
+    <div class="card-header d-flex justify-content-between align-items-center"
+         style="background:#1a222b; border:0;">
+        <h6 class="fw-bold mb-0">Detailed Transactions</h6>
+        <button id="customExcelBtn" class="btn btn-sm btn-success">
+        <i class="bi bi-file-earmark-excel me-1"></i> Export
+    </button>
+    </div>
+
+
+    <div class="card-body p-3" >
+        <ejs-grid id="report-grid" dataSource="@Model"
+                  allowPaging="true" allowSorting="true"
+                  allowExcelExport="true" allowPdfExport="true">
+
+            <e-grid-pagesettings pageSize="10"></e-grid-pagesettings>
+            <e-grid-columns>
+                <e-grid-column field="CategoryTitleWithIcon" headerText="Category"></e-grid-column>
+                <e-grid-column field="Date" headerText="Date" type="date" format="dd-MMM-yyyy"></e-grid-column>
+                <e-grid-column field="FormattedAmount" headerText="Amount" textAlign="Right"></e-grid-column>
+                <e-grid-column field="Note" headerText="Note"></e-grid-column>
+            </e-grid-columns>
+        </ejs-grid>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var grid = document.getElementById("report-grid").ej2_instances[0];
+                   document.getElementById("customExcelBtn").onclick = function () {
+            var fileName = "Transactions";
+            var startDatePicker = document.getElementById("startDate").ej2_instances[0];
+            var endDatePicker = document.getElementById("endDate").ej2_instances[0];
+
+            if (startDatePicker.value && endDatePicker.value) {
+                var startDate = new Date(startDatePicker.value).toISOString().slice(0, 10);
+                var endDate = new Date(endDatePicker.value).toISOString().slice(0, 10);
+                fileName += "_" + startDate + "_to_" + endDate;
+            }
+
+            grid.excelExport({ fileName: fileName + ".xlsx" });
+        };
+
+        });
+    </script>
+
+    <script>
+        function onStartDateChange(args){
+            var startDate = args.value;
+            var endDatePicker = document.getElementById("endDate").ej2_instances[0];
+
+            if(startDate && endDatePicker.value && startDate > endDatePicker.value){
+                alert("Start date cannot be after End date.");
+                args.element.value = ""; // clear invalid selection
+            } else {
+                // set min date for end date picker so user can’t pick earlier
+                endDatePicker.min = startDate;
+
+            }
+        }
+
+        function onEndDateChange(args) {
+            var endDate = args.value;
+           var startDatePicker = document.getElementById("startDate").ej2_instances[0];
+
+            if (endDate && startDatePicker.value && endDate < startDatePicker.value) {
+                alert("End date cannot be before Start date.");
+                args.element.value = ""; // clear invalid selection
+            } else {
+                // set max date for start date picker so user can’t pick later
+                startDatePicker.max = endDate;
+            }
+
+        }
+    </script>
+
+    <script>
+        function animateCounter(id, targetValue, duration = 1500) {
+            const element = document.getElementById(id);
+            const startValue = 0;
+            const increment = targetValue / (duration / 16); // ~60fps
+            let currentValue = startValue;
+
+            const counter = setInterval(() => {
+                currentValue += increment;
+                if (currentValue >= targetValue) {
+                    currentValue = targetValue;
+                    clearInterval(counter);
+                }
+                element.innerText = currentValue.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+            }, 16);
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            animateCounter("incomeCounter", @ViewBag.TotalIncome);
+            animateCounter("expenseCounter", @ViewBag.TotalExpense);
+            animateCounter("balanceCounter", @ViewBag.Balance);
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var grid = document.getElementById("report-grid").ej2_instances[0];
+
+                setTimeout(() => {
+                    let toolbar = document.querySelector("#report-grid .e-toolbar-items");
+                    if (toolbar) {
+                        toolbar.style.display = "flex";
+                        toolbar.style.width = "-50%";
+                        toolbar.style.justifyContent = "flex-end"; // push everything to the right
+
+                        let excelBtn = document.querySelector("#report-grid_excelexport");
+                        if (excelBtn) {
+                            excelBtn.style.marginRight = "auto"; // push it all the way to the far left
+                        }
+                    }
+                }, 500);
+
+            grid.toolbarClick = function (args) {
+                var fileName = "Transactions";
+                var startDatePicker = document.getElementById("startDate").ej2_instances[0];
+                var endDatePicker = document.getElementById("endDate").ej2_instances[0];
+
+                if (startDatePicker.value && endDatePicker.value) {
+                    var startDate = new Date(startDatePicker.value).toISOString().slice(0, 10);
+                    var endDate = new Date(endDatePicker.value).toISOString().slice(0, 10);
+                    fileName += "_" + startDate + "_to_" + endDate;
+                }
+
+                if (args.item.id === "report-grid_excelexport") {
+                    grid.excelExport({ fileName: fileName + ".xlsx" });
+                }
+            };
+
+            // 🔹 Customize for Excel
+            grid.excelQueryCellInfo = function (args) {
+                if (args.column.field === "CategoryTitleWithIcon") {
+                    args.value = args.data.Category ? args.data.Category.Title : "";
+                }
+                if (args.column.field === "FormattedAmount") {
+                    const prefix = (args.data.Category && args.data.Category.Type === "Expense") ? "- " : "+ ";
+                    args.value = prefix + args.data.Amount.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+                }
+                if (args.column.field === "Date") {
+                    args.value = new Date(args.data.Date).toLocaleDateString("en-US");
+                }
+            };
+        });
+    </script>
+
+}
+}

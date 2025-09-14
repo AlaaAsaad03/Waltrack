@@ -1,44 +1,116 @@
 ﻿@model IEnumerable<Waltrack.Models.Transaction>
 
-
 @{
     ViewData["PageTitle"] = "Transactions";
-    ViewData["PageActionText"] = "+ New Transaction";
     ViewData["PageActionUrl"] = "/Transaction/AddOrEdit";
 }
 
-<div class="row">
-    <div class="col-md-7">
-        <ejs-grid id="transactions" dataSource="@Model" gridLines="None" allowSorting="true" allowPaging="true">
+<div class="card shadow-sm border-0 mb-4" style="border-radius:1rem; background:#1a222b; color:#fff;">
+    <!-- Header -->
+    <div class="card-header d-flex justify-content-between align-items-center"
+         style="border-radius:1rem 1rem 0 0; background:#161d25; color:#fff;">
+        <h5 class="mb-0">💸 Transactions</h5>
+        <a href="/Transaction/AddOrEdit" class="btn btn-success btn-sm">
+            + New Transaction
+        </a>
+    </div>
+
+    <!-- Search & Filter -->
+    <div class="card-body border-bottom pb-3" style="background:#1a222b;">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-6">
+                <input id="searchBox"
+                       type="text"
+                       class="form-control border-0 text-white px-3"
+                       style="background:#2a3542; border-radius:0.5rem;"
+                       placeholder="Search transactions...">
+            </div>
+            <div class="col-md-6 text-end">
+                <select id="filterType"
+                        class="form-select border-0 text-white px-3"
+                        style="background:#2a3542; border-radius:0.5rem; width:auto; display:inline-block;">
+                    <option value="">All Types</option>
+                    <option value="Income">Income</option>
+                    <option value="Expense">Expense</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="card-body" style="background:#1a222b;">
+        <ejs-grid id="transactions" dataSource="@Model" allowSorting="true" allowPaging="true" gridLines="None" rowHeight="45">
             <e-grid-pagesettings pageSize="5"></e-grid-pagesettings>
             <e-grid-columns>
-                <e-grid-column headerText="Category" field="CategoryTitleWithIcon"></e-grid-column>
-                <e-grid-column headerText="Date" field="Date" width="150px" type="date" format="MMM-dd-yyyy" textAlign="Left"></e-grid-column>
-                <e-grid-column headerText="Amount" field="FormattedAmount" width="110px" textAlign="Right"></e-grid-column>
-                <e-grid-column headerText="Actions" template="#actionColumntemplate" width="100px"></e-grid-column>
+                <e-grid-column headerText="Category" field="CategoryTitleWithIcon" width="200px"></e-grid-column>
+                <e-grid-column headerText="Type" template="#typeColumntemplate" width="120px" textAlign="Center"></e-grid-column>
+                <e-grid-column headerText="Date" field="Date" width="150px" type="date" format="MMM-dd-yyyy"></e-grid-column>
+                <e-grid-column headerText="Amount" field="FormattedAmount" width="120px" textAlign="Right"></e-grid-column>
+                <e-grid-column headerText="Actions" template="#actionColumntemplate" width="120px"></e-grid-column>
             </e-grid-columns>
         </ejs-grid>
     </div>
-
-    <div class="col-md-5">
-        <div class="widget h-100 d-flex justify-content-center align-items-center">
-            <i class="fa-solid fa-money-bill-transfer fa-2xl"></i>
-        </div>
-    </div>
 </div>
 
-@*Custom 'Actions' column with badge (template definition)*@
-<script id="actionColumntemplate" type="text/x-template">
-    <div class="d-flex flex-row justify-content-start">
-        <a class="btn btn-sm no-a-decoration" href="/Transaction/AddOrEdit/${TransactionId}">
-            <i class="fa-solid fa-pen fa-lg"></i>
-        </a>
+<!-- Type Badge Template -->
+<script id="typeColumntemplate" type="text/x-template">
+    ${if(Category && Category.Type=="Income")}
+        <span class="badge bg-success px-3 py-2 rounded-pill">${Category.Type}</span>
+    ${else if(Category)}
+        <span class="badge bg-danger px-3 py-2 rounded-pill">${Category.Type}</span>
+    ${else}
+        <span class="badge bg-secondary px-3 py-2 rounded-pill">N/A</span>
+    ${/if}
+</script>
 
-        <form action="/Transaction/Delete/${TransactionId}" method="post">
-    @Html.AntiForgeryToken()
-            <button type="submit" class="btn btn-sm btn-link no-a-decoration" onclick="return confirm(&quot;Are you sure to delete this record?&quot;)">
-                <i class="fa-solid fa-trash-can fa-lg text-danger"></i>
+<!-- Action Buttons Template -->
+<script id="actionColumntemplate" type="text/x-template">
+    <div class="d-flex gap-2">
+        <a class="btn btn-sm btn-success rounded-circle" href="/Transaction/AddOrEdit/${TransactionId}" title="Edit">
+            <i class="fa-solid fa-pen"></i>
+        </a>
+        <form action="/Transaction/Delete/${TransactionId}" method="post" class="d-inline">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle text-white border-0"
+                    onclick="return confirm('Are you sure to delete this record?')" title="Delete">
+                <i class="fa-solid fa-trash-can"></i>
             </button>
         </form>
     </div>
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var grid = document.getElementById("transactions").ej2_instances[0];
+
+        function applySearchAndFilter() {
+            var searchValue = document.getElementById("searchBox").value.toLowerCase();
+            var filterType = document.getElementById("filterType").value;
+
+            var query = new ej.data.Query();
+
+            // Search across category/title and amount
+            if (searchValue) {
+                query = query.search(searchValue, ["CategoryTitleWithIcon", "FormattedAmount"], "contains", true);
+            }
+
+            // Filter by type (Income / Expense)
+            if (filterType) {
+                query = query.where("Category.Type", "equal", filterType, true);
+            }
+
+            grid.query = query;
+            grid.refresh();
+        }
+
+        grid.dataBound = function () {
+            if (grid.currentViewData.length === 0) {
+                grid.element.querySelector(".e-content").innerHTML =
+                    "<div class='text-center py-4 text-muted'>No transactions found. <br><a href='/Transaction/AddOrEdit' class='btn btn-sm btn-success mt-2'>+ Add First Transaction</a></div>";
+            }
+        };
+
+        document.getElementById("searchBox").addEventListener("keyup", applySearchAndFilter);
+        document.getElementById("filterType").addEventListener("change", applySearchAndFilter);
+    });
 </script>
