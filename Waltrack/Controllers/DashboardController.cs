@@ -1,21 +1,29 @@
-﻿using Waltrack.Models;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using Waltrack.Models;
 
 namespace Waltrack.Controllers
 {
+    [Authorize]
     public class DashboardController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public DashboardController(ApplicationDbContext context)
+        public DashboardController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         public async Task<ActionResult> Index()
         {
+
+            // Get current user's ID
+            string userId = _userManager.GetUserId(User);
             #region Last 7 days transactions
 
             // Current Month Transactions
@@ -24,7 +32,7 @@ namespace Waltrack.Controllers
 
             List<Transaction> SelectedTransactions = await _context.Transactions
                 .Include(y => y.Category)
-                .Where(x => x.Date >= StartDate && x.Date <= EndDate)
+                .Where(x => x.UserId == userId && x.Date >= StartDate && x.Date <= EndDate)
                 .ToListAsync();
 
             #endregion Last 7 days transactions

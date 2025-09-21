@@ -1,26 +1,40 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Syncfusion.EJ2.HeatMap;
 using Syncfusion.EJ2.HeatMap;
 using System.Globalization;
 using Waltrack.Models;
-using Syncfusion.EJ2.HeatMap;
 
 
 namespace Waltrack.Controllers
 {
+    [Authorize]
     public class ReportsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public ReportsController(ApplicationDbContext context)
+
+        public ReportsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
+
         }
 
         public async Task<IActionResult> Index(DateTime? startDate, DateTime? endDate)
         {
+
+            // Get logged-in user's ID
+            var userId = _userManager.GetUserId(User);
+
             // Step 1: Base query
-            var query = _context.Transactions.Include(t => t.Category).AsQueryable();
+            var query = _context.Transactions
+                .Include(t => t.Category)
+                 .Where(t => t.UserId == userId)
+                 .AsQueryable();
 
             // Step 2: Apply date range filter
             if (startDate.HasValue && endDate.HasValue)

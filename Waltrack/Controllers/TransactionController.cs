@@ -1,21 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Waltrack.Models;
 
 namespace Waltrack.Controllers
 {
+    [Authorize]
     public class TransactionController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public TransactionController(ApplicationDbContext context)
+        public TransactionController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Transaction
@@ -23,7 +28,14 @@ namespace Waltrack.Controllers
         {
             PopulateCategories();
 
-            var applicationDbContext = _context.Transactions.Include(t => t.Category);
+            // Get the ID of the currently logged-in user
+            string userId = _userManager.GetUserId(User);
+
+
+            // Filter transactions to only those belonging to the current user
+            var applicationDbContext = _context.Transactions
+               .Include(t => t.Category)
+               .Where(t => t.UserId == userId);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -39,23 +51,39 @@ namespace Waltrack.Controllers
                 return View(_context.Transactions.Find(id));
         }
 
-        // POST: Transaction/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddOrEdit([Bind("TransactionId,CategoryId,Amount,Note,Date")] Transaction transaction)
         {
-            if (ModelState.IsValid)
+            // check ModelState
+            if (!ModelState.IsValid)
             {
-                if(transaction.TransactionId == 0)
-                    _context.Add(transaction);
-                else
-                    _context.Update(transaction);
-                    await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                Console.WriteLine("Validation errors: " + string.Join(", ", errors));
+                PopulateCategories();
+                return View(transaction);
             }
-            PopulateCategories();
-            return View(transaction);
-        }      
+
+            // assign user id
+            transaction.UserId = _userManager.GetUserId(User);
+
+            Console.WriteLine("UserId: " + transaction.UserId);
+            Console.WriteLine("TransactionId: " + transaction.TransactionId);
+
+            if (transaction.TransactionId == 0)
+            {
+                _context.Add(transaction);
+            }
+            else
+            {
+                _context.Update(transaction);
+            }
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
 
 
         // POST: Transaction/Delete/5

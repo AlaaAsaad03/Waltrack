@@ -1,0 +1,59 @@
+﻿@{
+    Layout = "_Layout"; // Use the main layout
+    ViewData["Title"] = "Welcome to Waltrack";
+    ViewData["HideSidebar"] = true; // Custom flag to hide sidebar and main content padding
+}
+
+<style>
+    .welcome-container {
+        text-align: center;
+        color: #fff;
+        height: 80vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    .welcome-container h1 {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+    .welcome-container p {
+        font-size: 1.25rem;
+        max-width: 600px;
+        margin-bottom: 2rem;
+        color: #adb5bd;
+    }
+    .welcome-container .btn {
+        font-size: 1.1rem;
+        padding: 12px 24px;
+        margin: 0 10px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: transform 0.2s;
+    }
+    .welcome-container .btn:hover {
+        transform: translateY(-3px);
+    }
+    .btn-custom-primary {
+        background-color: #54ffa9;
+        border-color: #54ffa9;
+        color: #1a222b;
+    }
+     .btn-custom-secondary {
+        background-color: transparent;
+        border-color: #54ffa9;
+        color: #54ffa9;
+    }
+</style>
+
+<div class="welcome-container">
+    <i class="fa-solid fa-wallet fa-3x mb-4" style="color:#54ffa9;"></i>
+    <h1>Welcome to Waltrack</h1>
+    <p>Your personal finance companion. Track expenses, manage budgets, and achieve your financial goals with ease.</p>
+    <div>
+        <a asp-controller="Account" asp-action="Login" class="btn btn-custom-secondary">Login</a>
+        <a asp-controller="Account" asp-action="Register" class="btn btn-custom-primary">Get Started</a>
+    </div>
+</div>

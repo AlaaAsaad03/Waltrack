@@ -1,0 +1,41 @@
+﻿@model Waltrack.Models.RegisterViewModel
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "Register";
+}
+
+<div class="auth-header">
+    <i class="fa-solid fa-user-plus fa-2x mb-3"></i>
+    <h2>Create Your Account</h2>
+</div>
+
+<form asp-action="Register" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    <div class="form-floating mb-3">
+        <input asp-for="FullName" class="form-control" placeholder="John Doe" />
+        <label asp-for="FullName">Full Name</label>
+        <span asp-validation-for="FullName" class="text-danger"></span>
+    </div>
+    <div class="form-floating mb-3">
+        <input asp-for="Email" class="form-control" placeholder="name@example.com" />
+        <label asp-for="Email">Email address</label>
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div class="form-floating mb-3 password-container">
+        <input asp-for="Password" type="password" class="form-control" placeholder="Password" />
+        <label asp-for="Password">Password</label>
+        <i class="fa-solid fa-eye toggle-password"></i>
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+    <div class="form-floating mb-4 password-container">
+        <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Confirm Password" />
+        <label asp-for="ConfirmPassword">Confirm Password</label>
+        <i class="fa-solid fa-eye toggle-password"></i>
+        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-submit">Register</button>
+</form>
+
+<div class="auth-footer">
+    <p>Already have an account? <a asp-action="Login">Login</a></p>
+</div>

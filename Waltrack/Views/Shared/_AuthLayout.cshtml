@@ -1,0 +1,51 @@
+﻿@{
+    Layout = null; // Auth pages use this layout alone
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Waltrack</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            @RenderBody()
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const togglePasswordIcons = document.querySelectorAll('.toggle-password');
+
+            togglePasswordIcons.forEach(icon => {
+                icon.addEventListener('click', function () {
+                    // Find the password input field within the same container
+                    const passwordInput = this.parentElement.querySelector('input');
+
+                    // Toggle the type attribute
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        this.classList.remove('fa-eye');
+                        this.classList.add('fa-eye-slash');
+                    } else {
+                        passwordInput.type = 'password';
+                        this.classList.remove('fa-eye-slash');
+                        this.classList.add('fa-eye');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+﻿@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "Access Denied";
+}
+
+<div class="text-center text-white">
+    <i class="fa-solid fa-lock fa-3x mb-4" style="color:#FF0000;"></i>
+    <h1 class="display-4 fw-bold">Access Denied</h1>
+    <p class="lead mt-3">
+        Oops! You don't have permission to view this page.
+    </p>
+    <hr class="my-4" style="color:#404a55;" />
+    <p>
+        If you believe this is an error, please contact support.
+    </p>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-submit mt-3">Return to Home</a>
+</div>

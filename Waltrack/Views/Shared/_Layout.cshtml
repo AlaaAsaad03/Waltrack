@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -16,18 +20,62 @@
     <script src="https://cdn.syncfusion.com/ej2/29.1.33/dist/ej2.min.js"></script>
 </head>
 <body class="e-bigger">
-    <partial name="_SideBar" />
-    <nav class="navbar sticky-top">
-        <div class="container-fluid px-4 py-2">
-            <i class="fa-solid fa-magnifying-glass"></i>
 
-            <div>
-                <i class="fa-solid fa-bell"></i>
-                <i class="fa-solid fa-message"></i>
-                <img class="profile-pic" src="~/AvatarMaker_Small.png" />
+    @{
+        var isAuthenticated = SignInManager.IsSignedIn(User);
+        var hideSidebar = ViewData["HideSidebar"] as bool? ?? false;
+    }
+
+    @if (isAuthenticated && !hideSidebar)
+    {
+        <partial name="_SideBar" />
+    }
+
+    <div class="@(isAuthenticated && !hideSidebar ? "main-content-loggedin" : "main-content-loggedout")">
+    <nav class="navbar sticky-top">
+
+        <div class="container-fluid px-4 py-2">
+                @if (isAuthenticated)
+                {
+                    // Left side for logged-in users (e.g., search icon)
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+                    // Right side for logged-in users
+                    <div class="d-flex align-items-center">
+                        <i class="fa-solid fa-bell me-3"></i>
+                        <i class="fa-solid fa-message me-3"></i>
+                        <div class="dropdown">
+                            <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="~/AvatarMaker_Small.png" alt="" width="32" height="32" class="rounded-circle me-2">
+                                <strong>@UserManager.GetUserName(User)</strong>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+                                <li><a class="dropdown-item" href="#">Profile</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form asp-controller="Account" asp-action="Logout" method="post">
+                                        <button type="submit" class="dropdown-item">Sign out</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    // Left side for logged-out users (App Name)
+                    <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
+                        <i class="fa-solid fa-wallet"></i> Waltrack
+                    </a>
+
+                    // Right side for logged-out users
+                    <div>
+                        <a class="btn btn-outline-light me-2" asp-controller="Account" asp-action="Login">Login</a>
+                        <a class="btn btn-success" asp-controller="Account" asp-action="Register">Register</a>
+                    </div>
+                }
             </div>
-        </div>
-    </nav>
+        </nav>
     <div class="main-content">
         <div class="container mt-5">
             <div class="row justify-content-center">
@@ -53,32 +101,39 @@
                                             </div>
                                         </div>
 
-                                        @*breadcrumb*@
-                                        @if (ViewData["BreadcrumbItems"] != null)
-                                        {
-                                            <ejs-breadcrumb id="breadcrumb" separatorTemplate="@Html.Raw("<span class='fa-solid fa-angle-right'></span>")" items="@(ViewData["BreadcrumbItems"] as List<Syncfusion.EJ2.Navigations.BreadcrumbItem>)">
-                                            </ejs-breadcrumb>
-                                        }
-                                        else
-                                        {
-                                            // Fallback or a default breadcrumb
-                                            <ejs-breadcrumb id="breadcrumb" separatorTemplate="@Html.Raw("<span class='fa-solid fa-angle-right'></span>")">
-                                                <e-breadcrumb-items>
-                                                    <e-breadcrumb-item text="Home" url="/"></e-breadcrumb-item>
-                                                    <e-breadcrumb-item text="@ViewData["PageTitle"]" url="@Context.Request.Path"></e-breadcrumb-item>
-                                                </e-breadcrumb-items>
-                                            </ejs-breadcrumb>
-                                        }
+                                            <!-- Breadcrumb (only if authenticated) -->
+                                            @if (isAuthenticated)
+                                            {
+                                                if (ViewData["BreadcrumbItems"] != null)
+                                                {
+                                                    <ejs-breadcrumb id="breadcrumb"
+                                                                    separatorTemplate="@Html.Raw("<span class='fa-solid fa-angle-right'></span>")"
+                                                                    items="@(ViewData["BreadcrumbItems"] as List<Syncfusion.EJ2.Navigations.BreadcrumbItem>)">
+                                                    </ejs-breadcrumb>
+                                                }
+                                                else
+                                                {
+                                                    <ejs-breadcrumb id="breadcrumb"
+                                                                    separatorTemplate="@Html.Raw("<span class='fa-solid fa-angle-right'></span>")">
+                                                        <e-breadcrumb-items>
+                                                            <e-breadcrumb-item text="Home" url="/"></e-breadcrumb-item>
+                                                            <e-breadcrumb-item text="@ViewData["PageTitle"]"
+                                                                               url="@Context.Request.Path"></e-breadcrumb-item>
+                                                        </e-breadcrumb-items>
+                                                    </ejs-breadcrumb>
+                                                }
+                                            }
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        }
+                            }
 
                         @RenderBody()
                     </main>
                 </div>
             </div>
         </div>
+    </div>
     </div>
  
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
@@ -88,10 +143,8 @@
     @await RenderSectionAsync("Scripts", required: false)
     <!-- Syncfusion ASP.NET Core Script Manager -->
     <ejs-scripts></ejs-scripts>
-    <ejs-breadcrumb id="breadcrumb" separatorTemplate="@Html.Raw("<span class='fa-solid fa-angle-right'></span>")">
-    </ejs-breadcrumb>
-
-    }
+    @* <ejs-breadcrumb id="breadcrumb" separatorTemplate="@Html.Raw("<span class='fa-solid fa-angle-right'></span>")">
+    </ejs-breadcrumb> *@
 
 </body>
 </html>

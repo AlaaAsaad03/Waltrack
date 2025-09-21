@@ -15,7 +15,14 @@ namespace Waltrack.Controllers
 
         public IActionResult Index()
         {
-            return View();
+           if(User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                // If logged in, redirect to the main dashboard
+                return RedirectToAction("Index","Dashboard");
+            }
+
+            // If not logged in, show the public welcome/landing page
+            return View("Welcome");
         }
 
         public IActionResult Privacy()
